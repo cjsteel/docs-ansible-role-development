@@ -39,7 +39,9 @@ Christopher Steel
 ## Ansible role overview
 
 * Check for availability of newer version
+  * Get latest current version of virtualbox latest
   * Check for any previously installed version
+    * check installed version if any
   * Remove any previously installed version
   * Restart system (preferred)
   * Install new version
