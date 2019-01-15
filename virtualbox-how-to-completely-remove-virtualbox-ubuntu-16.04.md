@@ -58,10 +58,6 @@ sudo modprobe vboxdrv
 sudo modprobe vboxnetflt
 ```
 
-
-
-
-
 ## Uninstall virtualbox and configuration
 
 Your problem : Virtual Box keeps its folder and settings in your home folder. Delete everything inside the folder.

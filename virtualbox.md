@@ -14,7 +14,7 @@ Christopher Steel
 
 ### ansible vmware provisioning
 
-* [](https://github.com/MindPointGroup/ansible-vmware-provisioning)
+* [ansible-vmware-provisioning](https://github.com/MindPointGroup/ansible-vmware-provisioning)
 
 ## Requirements
 
@@ -34,10 +34,10 @@ Christopher Steel
 * **Backups should be added for all actions to allow for a restore.**
 * A Script to remove the backups could be made available as well to clean up if everything is OK.
 
-
-
 ## Ansible role overview
 
+* Check for resources mount
+  * when virtualbox_resources_mount_check
 * Check for availability of newer version
   * Get latest current version of virtualbox latest
   * Check for any previously installed version
@@ -156,10 +156,36 @@ Using `resource_filenames` as our source we download the files we want for our t
 
 Ansible scripts will require the distribution and architecture
 
+#### Install html2text (Must be installed)
+
+```shell
+cd ~/bin/
+git clone git@github.com:aaronsw/html2text.git
+ln -s html2text/html2text.py html2txt
+```
+
+#### Find package name
+
+```shell
+cd ~/resources/sw/ubuntu/16.04/virtualbox/5.2.22
+html2txt --ignore-links https://download.virtualbox.org/virtualbox/5.2.22/ > index.txt
+cat index.txt | grep xenial_amd64 | cut -c 11-81 > xenial_amd64_package.txt.raw
+sed -r 's/\s+//g' xenial_amd64_package.txt.raw > xenial_amd64_package.txt
+cat xenial_amd64_package.txt | awk '{print "VIRTUALBOX_PACKAGE_NAME="$1}' > xenial_amd64_package_var.txt
+cat xenial_amd64_package_var.txt
+```
+
+#### Set var
+
+```shell
+source xenial_amd64_package_var.txt
+echo $VIRTUALBOX_PACKAGE_NAME
+```
+
 #### Download the `xenial_amd64.deb` file
 
 ```shell
-wget https://download.virtualbox.org/virtualbox/${VBOX_LATEST}/`cat resource_filenames | grep bionic_amd64.deb`
+wget https://download.virtualbox.org/virtualbox/${VBOX_LATEST}/`cat xenial_amd64_package.txt`
 ```
 
 ### Download the Guest Additions ISO
@@ -208,7 +234,11 @@ virtualbox-5.2_5.2.12-122591~Ubuntu~xenial_amd64.deb: OK
 
 ## Copy Resources to target systems
 
-## Installation
+### Ensure for resource storage directory
+
+### Copy over resources
+
+## Install
 
 ### Install VirtualBox
 
@@ -218,6 +248,8 @@ apt-get install -f
 ```
 
 ### Install Guest Additions ISO
+
+(Probably not required, does package install take care of this?
 
 #### Debian to default location
 
@@ -246,10 +278,33 @@ wget https://download.virtualbox.org/virtualbox/${VBOX_LATEST}/SDKRef.pdf
 
 ### Install the Extension Pack
 
-NON Commercial usage only
+Non commercial / Personal and Educational usage
+
+In order to get the or batch installation license key run the following command and accept the license terms:
 
 ```shell
-sudo VBoxManage extpack install --replace Oracle_VM_VirtualBox_Extension_Pack-${VBOX_LATEST}.vbox-extpack
+sudo VBoxManage extpack install --accept-license=715c7246dc0f779ceab39446812362b2f9bf64a55ed5d3a905f053cfab36da9e --replace Oracle_VM_VirtualBox_Extension_Pack-5.2.22.vbox-extpack
+```
+
+This will output a (the?) batch installation license. Here is example output when running the above on the Extension Pack installation procedure for VirtualBox  version 5.2.22:
+
+```shell
+relating to this Agreement.
+
+Do you agree to these license terms and conditions (y/n)? y
+
+License accepted. For batch installaltion add
+--accept-license=56be48f923303c8cababb0bb4c478284b688ed23f16d775d729b89a2e8e5f9eb
+to the VBoxManage command line.
+
+0%...10%...20%...30%...40%...50%...60%...70%...80%...90%...100%
+Successfully installed "Oracle VM VirtualBox Extension Pack".
+```
+
+
+
+```shell
+virtualbox_extension_pack_batch_installation_license
 ```
 
 Using a script:
@@ -281,20 +336,49 @@ Output example:
 5.2.22r126460
 ```
 
+## User Documentation
 
+### References
 
-## Ansible roles
+* http://www.mydailytutorials.com/how-to-split-strings-and-join-them-in-a%E2%80%8Bnsibl%E2%80%8Be/
+* 
 
-https://github.com/Oefenweb/ansible-virtualbox
+### Virtualbox Included Documents
 
-- name: add dependency manager
-  apt: name=dkms
-  sudo: yes
+```shell
+sudo cp UserManual.pdf /usr/share/doc/virtualbox-5.2/.
+sudo chmod 0644 /usr/share/doc/virtualbox-5.2/UserManual.pdf
 
-- name: add virtualbox repo for precise
-  apt_repository: repo='deb http://download.virtualbox.org/virtualbox/debian precise contrib'
-  sudo: yes
+sudo cp SDKRef.pdf /usr/share/doc/virtualbox-5.2/.
+sudo chmod 0644 /usr/share/doc/virtualbox-5.2/SDKRef.pdf 
+ls -al /usr/share/doc/virtualbox-5.2/.
 
-- name: add VirtualBox repo signing key
-  apt_key: state=present
-  ​         url=http://download.virtualbox.org/virtualbox/debian/oracle_vbox.asc
+```
+
+### Users local menu
+
+#### Ensure for user documentation directory
+
+Candidates:
+
+```shell
+~/bin/local-menu
+```
+
+```shell
+~/.local/acemenu
+```
+
+#### Ensure menu requirements are installed
+
+* menu program
+* firefox
+* 
+
+```shell
+mkdir -p ~/opt/acemenu/docs/virtualbox/
+```
+
+minimum file list
+
+files/docs/virtualbox/
